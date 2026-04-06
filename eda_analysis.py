@@ -15,8 +15,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
-from statsmodels.stats.power import TTestIndPower
-from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+# Soft imports for statsmodels (Tier 1 & 3 extensions)
+try:
+    from statsmodels.stats.power import TTestIndPower
+    from statsmodels.stats.multicomp import pairwise_tukeyhsd
+    HAS_STATSMODELS = True
+except ImportError:
+    HAS_STATSMODELS = False
+
 from eda_report import EDAReport
 
 
@@ -266,9 +273,7 @@ def run_anova_tests(df):
         print("Interpretation: Significant differences exist in average GPA across departments.")
         print("\n--- Post-hoc Pairwise T-tests (Bonferroni Correction) ---")
         
-        # Using Tukey HSD as a more common post-hoc, but user asked for Bonferroni pairwise t-tests.
-        # stats.ttest_ind with correction manually or use pairwise_tukeyhsd which is often preferred.
-        # Let's do manual Bonferroni as requested.
+        # Manual Bonferroni correction as requested
         depts = df['department'].unique()
         comparisons = []
         for i in range(len(depts)):
@@ -289,7 +294,6 @@ def run_anova_tests(df):
             is_significant = p_val_pair < alpha_corrected
             if is_significant:
                 significant_diffs.append((d1, d2, p_val_pair))
-            # print(f"{d1} vs {d2}: p = {p_val_pair:.6f} {'*' if is_significant else ''}")
         
         if significant_diffs:
             print("Significant differences found between:")
@@ -343,6 +347,11 @@ def run_power_analysis(df):
 
     Calculate needed sample size for 80% power at alpha = 0.05.
     """
+    if not HAS_STATSMODELS:
+        print("\n--- Power Analysis ---")
+        print("Skipping Power Analysis: 'statsmodels' not installed.")
+        return
+
     print("\n--- Power Analysis ---")
     group_yes = df[df['has_internship'] == 'Yes']['gpa']
     group_no = df[df['has_internship'] == 'No']['gpa']
