@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from statsmodels.stats.power import TTestIndPower
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
