@@ -11,9 +11,9 @@
 ## Key Distribution Findings
 - **GPA**: The distribution is left-skewed, with most students clustering between 2.5 and 3.5. A tail extends toward lower GPAs.
 - **Weekly Study Hours**: Shows a roughly normal distribution centered around 14.9 hours.
-- **GPA by Department**: Box plots reveal that GPA distributions are fairly consistent across departments, with slight variations in medians and outliers.
+- **GPA by Department**: Box plots and violin plots reveal that GPA distributions are fairly consistent across departments, with slight variations in medians and outliers. The violin plots show similar shapes for all departments, suggesting no major differences in the spread of academic performance.
 - **Scholarships**: The distribution is balanced across Merit, Athletic, Need-based, and Department scholarships, with a significant number of students having no scholarship (None).
-- **See output/gpa_distribution.png, output/study_hours_distribution.png, and output/gpa_by_department.png**.
+- **See output/gpa_distribution.png, output/study_hours_distribution.png, output/gpa_by_department_boxplot.png, and output/gpa_by_department_violin.png**.
 
 ## Notable Correlations
 - **GPA and Study Hours**: A moderate positive correlation (r = 0.64) exists between weekly study hours and GPA. This suggests that students who study more tend to have higher GPAs.
@@ -38,6 +38,32 @@
     - P-value: 0.3769
     - Degrees of freedom: 16
 - **Interpretation**: The result is not statistically significant (p > 0.05). There is no strong evidence of an association between a student's department and their scholarship status.
+
+### Hypothesis 3: Average GPA differs across the five departments (ANOVA).
+- **Test Used**: One-Way ANOVA.
+- **Results**:
+    - F-statistic: 0.6671
+    - P-value: 0.6148
+- **Interpretation**: The result is not statistically significant (p > 0.05). There is no strong evidence of a difference in mean GPA between any of the five departments.
+
+## Challenge Extension Results
+
+### Tier 1 — Advanced Statistical Analysis
+- **ANOVA**: Confirmed no statistically significant difference in GPA across departments.
+- **Violin Plots**: Provided deeper insight into GPA distribution shape by department, confirming consistency across the university (See `output/gpa_by_department_violin.png`).
+
+### Tier 2 — Automated EDA Report Generator
+- **Module**: Built a reusable `eda_report.py` that can handle any DataFrame.
+- **Features**: Automatically generates data profiles, distribution plots, correlation heatmaps, missing data maps, and outlier summaries.
+- **Verification**: Passed 5 automated tests verifying its robustness against different data patterns.
+
+### Tier 3 — Statistical Simulation and Power Analysis
+- **Bootstrap Confidence Intervals**: 
+    - Internship (Yes): [2.95, 3.02] 
+    - Internship (No): [2.68, 2.72]
+    - The non-overlapping CIs further confirm the statistical significance found in the t-test.
+- **Power Analysis**: To detect an effect size of d = 0.69 with 80% power at alpha = 0.05, a sample size of only ~23 students per group is required. Our current sample size (N=2000) provides extremely high statistical power.
+- **Simulation**: A simulation of 1,000 tests under the null hypothesis yielded a false positive rate of ~5.3%, which aligns with our target alpha of 0.05.
 
 ## Actionable Recommendations
 1. **Encourage Internship Participation**: Since students with internships show significantly higher GPAs, the university should expand its internship program and encourage more students to participate, as it may correlate with better academic outcomes.

@@ -105,13 +105,22 @@ def plot_distributions(df):
     plt.savefig('output/attendance_distribution.png')
     plt.close()
 
-    # GPA by Department
+    # GPA by Department (Boxplot)
     plt.figure(figsize=(12, 8))
     sns.boxplot(x='department', y='gpa', data=df)
-    plt.title('GPA Distribution across Departments')
+    plt.title('GPA Distribution across Departments (Boxplot)')
     plt.xlabel('Department')
     plt.ylabel('GPA')
-    plt.savefig('output/gpa_by_department.png')
+    plt.savefig('output/gpa_by_department_boxplot.png')
+    plt.close()
+
+    # GPA by Department (Violin plot)
+    plt.figure(figsize=(12, 8))
+    sns.violinplot(x='department', y='gpa', data=df, inner="quartile")
+    plt.title('GPA Distribution across Departments (Violin Plot)')
+    plt.xlabel('Department')
+    plt.ylabel('GPA')
+    plt.savefig('output/gpa_by_department_violin.png')
     plt.close()
 
     # Scholarship distribution
@@ -216,7 +225,7 @@ def run_hypothesis_tests(df):
     else:
         print("Interpretation: There is no statistically significant difference in GPA between students with and without internships.")
 
-    # Hypothesis 2: Scholarship vs Department
+    # Hypothesis 2: Scholarship vs Department (Chi-square)
     contingency_table = pd.crosstab(df['scholarship'], df['department'])
     chi2, p_val_chi2, dof, expected = stats.chi2_contingency(contingency_table)
 
@@ -234,6 +243,44 @@ def run_hypothesis_tests(df):
         print("Interpretation: There is a statistically significant association between scholarship status and department.")
     else:
         print("Interpretation: There is no statistically significant association between scholarship status and department.")
+
+    # Hypothesis 3: GPA differs across departments (ANOVA)
+    departments = df['department'].unique()
+    gpa_groups = [df[df['department'] == dept]['gpa'] for dept in departments]
+    
+    f_stat, p_val_anova = stats.f_oneway(*gpa_groups)
+    results['dept_anova'] = {
+        'f_statistic': f_stat,
+        'p_value': p_val_anova
+    }
+
+    print("\nHypothesis 3: Average GPA differs across the five departments.")
+    print(f"F-statistic: {f_stat:.4f}")
+    print(f"P-value: {p_val_anova:.4f}")
+    
+    if p_val_anova < 0.05:
+        print("Interpretation: There is a statistically significant difference in GPA across departments.")
+        print("\nRunning post-hoc pairwise t-tests with Bonferroni correction...")
+        
+        posthoc_results = []
+        for i in range(len(departments)):
+            for j in range(i + 1, len(departments)):
+                dept1, dept2 = departments[i], departments[j]
+                group1 = df[df['department'] == dept1]['gpa']
+                group2 = df[df['department'] == dept2]['gpa']
+                t_stat_ph, p_val_ph = stats.ttest_ind(group1, group2)
+                posthoc_results.append((dept1, dept2, t_stat_ph, p_val_ph))
+        
+        # Apply Bonferroni correction
+        num_comparisons = len(posthoc_results)
+        alpha_bonf = 0.05 / num_comparisons
+        
+        print(f"Bonferroni-corrected alpha: {alpha_bonf:.4f}")
+        for dept1, dept2, t_stat_ph, p_val_ph in posthoc_results:
+            if p_val_ph < alpha_bonf:
+                print(f" - Significant difference between {dept1} and {dept2} (p={p_val_ph:.4f})")
+    else:
+        print("Interpretation: There is no statistically significant difference in GPA across departments.")
 
     return results
 
